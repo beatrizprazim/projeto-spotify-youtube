@@ -58,6 +58,7 @@ def carregar(database_url: str) -> dict[str, pd.DataFrame]:
         "regiao": "SELECT * FROM regiao_resumo",
         "overlap": "SELECT * FROM regiao_overlap",
         "execucoes": "SELECT * FROM pipeline_execucao ORDER BY inicio DESC",
+        "cobertura_api": "SELECT COUNT(DISTINCT track_id) AS recebidas FROM raw_spotify_track",
     }
     try:
         with engine.connect() as con:
@@ -131,6 +132,16 @@ if chart.empty or not paises:
 
 # ------------------------------------------------------------------ cabeçalho
 st.title("Tendências musicais e audiovisuais · Spotify × YouTube")
+esperadas_api = d["chart"]["track_id"].nunique()
+recebidas_api = int(d["cobertura_api"].iloc[0]["recebidas"])
+if recebidas_api < esperadas_api:
+    st.warning(f"Spotify parcial: {recebidas_api} de {esperadas_api} faixas com resposta da API. "
+               "As demais usam os nomes dos CSVs; metadados ausentes não foram estimados.")
+if d["videos"].empty:
+    st.warning("YouTube ainda não carregado neste banco. Os cruzamentos e indicadores de vídeo "
+               "aguardam a coleta real; valores vazios ou zero não significam ausência de popularidade.")
+if d["chart"]["genero_principal"].eq("(sem gênero)").all():
+    st.info("Gêneros indisponíveis na coleta atual do Spotify. Comparações por gênero ficam pendentes.")
 # O modo vem do próprio banco (última execução), e não do .env: assim um banco gerado
 # com dados reais num PC continua marcado como real quando é aberto em outro PC.
 ultimas = d["execucoes"]
