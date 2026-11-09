@@ -1,0 +1,34 @@
+{
+  "etl3_correlacao": {
+    "linhas": 30
+  },
+  "etl4_regiao": {
+    "linhas": 105
+  },
+  "tabelas": {
+    "raw_spotify_chart": 1500,
+    "raw_spotify_track": 301,
+    "raw_youtube_video": 0,
+    "raw_youtube_categoria": 0,
+    "spotify_faixa": 400,
+    "spotify_chart": 1500,
+    "youtube_video": 0,
+    "musica_video": 0,
+    "correlacao_resumo": 30,
+    "regiao_resumo": 30,
+    "regiao_overlap": 75
+  },
+  "dashboard_excecoes": [],
+  "dashboard_abas": [
+    "🎧 Spotify",
+    "▶️ YouTube",
+    "🔗 Música × Vídeo",
+    "🌎 Regiões",
+    "⚙️ Pipeline"
+  ],
+  "dashboard_avisos": [
+    "Spotify parcial: 301 de 400 faixas com resposta da API. As demais usam os nomes dos CSVs; metadados ausentes não foram estimados.",
+    "YouTube ainda não carregado neste banco. Os cruzamentos e indicadores de vídeo aguardam a coleta real; valores vazios ou zero não significam ausência de popularidade.",
+    "Origem do banco: não confirmado ou misto. Estes dados não comprovam resultados reais."
+  ]
+}

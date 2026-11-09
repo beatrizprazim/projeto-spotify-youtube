@@ -1,0 +1,22 @@
+{
+  "faixas_auditadas_api": 301,
+  "cobertura_por_verificacao": {
+    "id_confere": 301,
+    "nome_preenchido": 301,
+    "artistas_com_id_e_nome": 301,
+    "album_com_id_e_nome": 301,
+    "duracao_positiva": 301,
+    "lancamento_preenchido": 301,
+    "precisao_lancamento_valida": 301,
+    "isrc_preenchido": 301,
+    "url_spotify_preenchida": 301,
+    "explicit_booleano": 301,
+    "numero_faixa_positivo": 301,
+    "generos_disponiveis": 0
+  },
+  "problemas": [],
+  "falhas_http": {
+    "429": 1
+  },
+  "artistas_consultados_com_sucesso": 297
+}
