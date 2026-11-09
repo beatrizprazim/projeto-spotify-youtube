@@ -50,6 +50,7 @@ def carregar(database_url: str) -> dict[str, pd.DataFrame]:
                            f.duracao_min, f.tem_feat, f.data_lancamento
                     FROM spotify_chart c JOIN spotify_faixa f USING (track_id)""",
         "videos": "SELECT * FROM youtube_video",
+        "coletas_youtube": "SELECT video_id, country, snapshot_date AS data_coleta, extracted_at FROM raw_youtube_video",
         "pares": """SELECT m.track_id, m.video_id, m.score, f.nome, f.artista_principal,
                            f.genero_principal
                     FROM musica_video m JOIN spotify_faixa f USING (track_id)
@@ -142,6 +143,24 @@ if d["videos"].empty:
                "aguardam a coleta real; valores vazios ou zero não significam ausência de popularidade.")
 if d["chart"]["genero_principal"].eq("(sem gênero)").all():
     st.info("Gêneros indisponíveis na coleta atual do Spotify. Comparações por gênero ficam pendentes.")
+# A semana alinhada não substitui a data em que a API foi consultada.
+if not d["coletas_youtube"].empty:
+    coletas = d["coletas_youtube"].copy()
+    coletas["data_coleta"] = pd.to_datetime(coletas["data_coleta"]).dt.date
+    recentes = coletas.sort_values("extracted_at").drop_duplicates(["video_id", "country"], keep="last")
+    referencia = videos[["video_id", "country", "snapshot_date"]].merge(
+        recentes[["video_id", "country", "data_coleta"]], on=["video_id", "country"])
+    if not referencia.empty:
+        primeira, ultima_coleta = referencia["data_coleta"].min(), referencia["data_coleta"].max()
+        st.caption(f"Coleta real do YouTube: {primeira:%d/%m/%Y} a {ultima_coleta:%d/%m/%Y}. "
+                   "Os filtros de semanas usam o alinhamento aos rankings do Spotify.")
+        distancia = (pd.to_datetime(referencia["data_coleta"]) -
+                     pd.to_datetime(referencia["snapshot_date"])).dt.days.abs()
+        if (distancia > 7).any():
+            st.warning(f"A coleta do YouTube está até {int(distancia.max())} dias distante dos rankings "
+                       "do Spotify selecionados. O cruzamento é uma aproximação temporal, "
+                       "não uma comparação do mesmo período.")
+
 # O modo vem do próprio banco (última execução), e não do .env: assim um banco gerado
 # com dados reais num PC continua marcado como real quando é aberto em outro PC.
 ultimas = d["execucoes"]
