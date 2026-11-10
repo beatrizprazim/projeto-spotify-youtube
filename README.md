@@ -52,7 +52,7 @@ streamlit run dashboard/app.py
 ### Rodar os testes
 
 ```bash
-pytest           # 28 testes: transformações, qualidade, pipeline ponta a ponta e precisão do matching
+pytest           # transformações, extração, qualidade, pipeline e precisão do matching
 ```
 
 ## Modo real (com as APIs)
@@ -64,15 +64,30 @@ pytest           # 28 testes: transformações, qualidade, pipeline ponta a pont
 
 ### Apresentar com dados reais em outro computador
 
-O dashboard só lê o banco, que no modo local é um único arquivo: `data/tendencias.db`.
+O dashboard lê o banco configurado em `DATABASE_URL`. Sem essa variável, usa
+`deploy/tendencias.db` quando disponível; caso contrário, usa `data/tendencias.db`.
 
 1. No PC com as chaves, rode `python -m src.pipeline` com `MODO=real`.
-2. Copie `data/tendencias.db` para a pasta `data/` do projeto no outro PC (pen drive, Drive ou WhatsApp).
-3. No outro PC, rode **só** `streamlit run dashboard/app.py`. **Não rode o pipeline lá**, senão ele mistura dados simulados no banco real.
+2. Copie o banco gerado para o outro PC e configure `DATABASE_URL` para o caminho dele.
+   Por exemplo, no PowerShell: `$env:DATABASE_URL = "sqlite:///data/tendencias.db"`.
+3. Rode **só** `streamlit run dashboard/app.py`. **Não rode o pipeline lá**, pois isso
+   pode misturar cargas no banco apresentado.
 
 As chaves nunca saem do primeiro PC. O dashboard descobre pelo próprio banco que os dados são reais e tira o aviso de "dados simulados".
 
-No modo real, a coleta do YouTube (feita no dia) é alinhada à semana do CSV do Spotify Charts mais próxima, para as duas fontes se cruzarem. A data original da coleta continua na camada RAW.
+No modo real, a coleta do YouTube (feita no dia) é alinhada à semana do CSV do Spotify Charts mais próxima **do mesmo país**, para as duas fontes se cruzarem. A data original da coleta continua na camada RAW. Esse alinhamento é uma aproximação temporal, não uma coleta histórica do YouTube.
+
+### Validar somente o YouTube — Louise (ETL 2)
+
+Com `YOUTUBE_API_KEY`, `PAISES` e os CSVs em `data/charts/`, execute em caminhos novos:
+
+```bash
+python -m src.verificar_youtube --banco work/youtube-validacao.db --relatorio work/youtube-validacao.json
+```
+
+O comando usa um banco isolado, carrega os Charts somente dos CSVs e executa uma coleta real do ETL 2. Não exige nem executa o enriquecimento da API Spotify. O banco contém as tabelas necessárias à validação do YouTube; não representa a execução completa dos ETLs 1 a 4. O relatório registra a coleta real, a semana alinhada por país, duplicações e ausências, sem credenciais. Vídeos fora da categoria `10` (Música) ficam apenas na RAW. Coleta incompleta por país interrompe a carga tratada e preserva os dados recebidos.
+
+Evidências da coleta de 04/11/2026: [validação do ETL 2](docs/validacao_youtube_louise.md).
 
 A API do YouTube só devolve o que está em alta **agora**. Para ter série histórica, rodem o pipeline toda semana: o upsert acumula as coletas sem duplicar.
 
@@ -96,35 +111,44 @@ A API do YouTube só devolve o que está em alta **agora**. Para ter série hist
 ├── Dockerfile, docker-compose.yml, requirements.txt, .env.example
 ```
 
-## Resultados com dados simulados
+## Resultados com dados reais
 
-Estes resultados validam o pipeline, **não são conclusões sobre o mercado real**:
+O banco real disponível em `deploy/tendencias.db` foi validado em 09/11/2026. A carga é
+parcial e deve ser interpretada com estas limitações:
 
-- Os 6 países × 4 semanas produziram 1.200 posições de chart, 218 faixas e 1.200 registros de vídeos em alta.
-- O matching música ↔ vídeo acertou 98,6% dos pares (212 pares "match") e encontrou 97% dos clipes reais. Isso é possível medir porque, no simulado, sabemos o gabarito.
-- A correlação de Spearman entre posição no Spotify e views no YouTube ficou em ρ ≈ −0,64. Como o 1º lugar é o número menor, o sinal negativo quer dizer que posição melhor vem com mais views.
-- O pipeline completo roda em cerca de 2 segundos e é idempotente: rodar duas vezes não duplica dados.
+- **Spotify:** 1.500 posições em seis países (AR, BR, ES, JP, MX e US), de 01 a
+  29/10/2026; 301 de 400 faixas receberam metadados da API. As outras 99 mantêm os
+  nomes dos Charts, sem metadados estimados. Gêneros não estão disponíveis.
+- **YouTube:** 165 vídeos de música tratados (153 IDs distintos) em seis países.
+  A coleta real ocorreu em 09/11 e foi alinhada ao Chart de 29/10, uma diferença de
+  11 dias; não é uma comparação do mesmo período nem uma série histórica semanal.
+  A mediana do engajamento nas observações tratadas é 1,90%.
+- **Cruzamento:** 9 vínculos automáticos confirmados e 8 aguardando revisão. Não houve
+  amostra suficiente para calcular Spearman; a correlação permanece indisponível.
+- **Regiões:** dados reais de vídeos e engajamento estão disponíveis para os seis
+  países, mas os indicadores de gênero ficam vazios por falta de metadados.
 
-Com os dados reais, substituam esses números pelos que o dashboard mostrar.
+O dashboard abre esse banco por padrão, exibe avisos de cobertura e desalinhamento e
+permite conferir as cinco abas. Seus gráficos e métricas refletem os filtros atuais;
+não use saídas de testes simulados como conclusões sobre o mercado.
 
 ## Limitações e melhorias futuras
 
 Ver [`docs/decisoes_tecnicas.md`](docs/decisoes_tecnicas.md#melhorias-futuras).
 
-## Deploy online (Streamlit Community Cloud, grátis)
+## Deploy online (Streamlit Community Cloud)
 
-1. Suba o projeto para um repositório no GitHub. O `.gitignore` já impede que o `.env` vá junto. Para o modo real, inclua os CSVs de `data/charts/` no repositório.
-2. Em https://share.streamlit.io, entre com o GitHub e clique em **Create app**. Escolha o repositório, a branch `main` e o arquivo `dashboard/app.py`.
-3. Em **Advanced settings**, escolha Python 3.12 e, em **Secrets**, cole as chaves no formato TOML:
+1. Execute o pipeline real em ambiente com as credenciais e valide o banco gerado.
+2. O repositório inclui `deploy/tendencias.db`, selecionado automaticamente quando
+   `DATABASE_URL` não estiver configurada. Para dados atualizados, configure um banco
+   PostgreSQL persistente em Secrets ou disponibilize um SQLite por um processo de
+   entrega controlado; o dashboard não reconstrói nem atualiza o banco.
+3. No Streamlit Community Cloud, selecione o repositório, a branch que contém estas
+   alterações e o arquivo `dashboard/app.py`. Use Python 3.12 e `requirements.txt`.
+4. Abra o app e confira Spotify, YouTube, Música × Vídeo, Regiões e Pipeline.
+   Sem o banco ou com esquema incompleto, o app mostra orientação de configuração.
+5. Após uma nova carga, use **Atualizar dados** para limpar o cache (também expira em 10 minutos).
 
-```toml
-MODO = "real"
-SPOTIFY_CLIENT_ID = "..."
-SPOTIFY_CLIENT_SECRET = "..."
-YOUTUBE_API_KEY = "..."
-PAISES = "BR,US,MX,AR,ES,JP"
-```
-
-4. Clique em **Deploy**. Na primeira abertura o dashboard roda o pipeline sozinho (alguns minutos) e depois mostra os dados.
-
-Sem os Secrets, o app sobe no modo simulado. O banco no servidor é temporário: quando o app "dorme" e acorda, o pipeline roda de novo na primeira visita, buscando o YouTube do dia. Para trocar a semana do Spotify, suba CSVs novos em `data/charts/`.
+O dashboard apenas lê os dados: não executa coleta nem cria dados simulados na abertura.
+As chaves das APIs são necessárias no ambiente de coleta; para consultar um banco
+pronto, basta configurar o acesso ao banco. Não publique senhas nem arquivos `.env`.

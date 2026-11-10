@@ -1,0 +1,207 @@
+{
+  "data_validacao_utc": "2026-11-09T08:17:51.158453+00:00",
+  "modo": "real",
+  "data_coleta": "2026-11-09",
+  "semana_spotify": "2026-10-29",
+  "distancia_dias": 11,
+  "banco": "deploy/tendencias.db",
+  "sha256": "29860d327ade634b7c9a02d15a354ed4d040c163b00c4a5ba78c8a263bfb35ea",
+  "integridade": "ok",
+  "tabelas": {
+    "raw_spotify_chart": 1500,
+    "raw_spotify_track": 301,
+    "spotify_faixa": 400,
+    "spotify_chart": 1500,
+    "raw_youtube_video": 180,
+    "raw_youtube_categoria": 31,
+    "youtube_video": 165,
+    "musica_video": 17,
+    "correlacao_resumo": 30,
+    "regiao_resumo": 30,
+    "regiao_overlap": 75
+  },
+  "paises": [
+    {
+      "pais": "BR",
+      "recebidos": 30,
+      "musica": 26,
+      "outras_categorias": 4
+    },
+    {
+      "pais": "AR",
+      "recebidos": 30,
+      "musica": 29,
+      "outras_categorias": 1
+    },
+    {
+      "pais": "MX",
+      "recebidos": 30,
+      "musica": 28,
+      "outras_categorias": 2
+    },
+    {
+      "pais": "US",
+      "recebidos": 30,
+      "musica": 28,
+      "outras_categorias": 2
+    },
+    {
+      "pais": "ES",
+      "recebidos": 30,
+      "musica": 29,
+      "outras_categorias": 1
+    },
+    {
+      "pais": "JP",
+      "recebidos": 30,
+      "musica": 25,
+      "outras_categorias": 5
+    }
+  ],
+  "duplicacoes": {
+    "raw_youtube_video": 0,
+    "youtube_video": 0
+  },
+  "campos_ausentes": {
+    "titulo": 0,
+    "canal": 0,
+    "views": 0,
+    "likes": 0,
+    "comentarios": 1,
+    "duracao_s": 0,
+    "publicado_em": 0
+  },
+  "inconsistencias": {
+    "categoria_fora_musica": 0,
+    "contagens_negativas": 0,
+    "engajamento_fora_faixa": 0,
+    "engajamento_calculo_divergente": 0
+  },
+  "spotify_preservado": {
+    "raw_spotify_chart": true,
+    "raw_spotify_track": true,
+    "spotify_faixa": true,
+    "spotify_chart": true
+  },
+  "cruzamentos": [
+    {
+      "status": "match",
+      "quantidade": 9
+    },
+    {
+      "status": "revisar",
+      "quantidade": 8
+    }
+  ],
+  "regioes": [
+    {
+      "country": "AR",
+      "n_videos_musica": 29,
+      "engajamento_medio_yt": 1.611,
+      "views_medianas_yt": 894777.0
+    },
+    {
+      "country": "BR",
+      "n_videos_musica": 26,
+      "engajamento_medio_yt": 1.353,
+      "views_medianas_yt": 864951.5
+    },
+    {
+      "country": "ES",
+      "n_videos_musica": 29,
+      "engajamento_medio_yt": 2.657,
+      "views_medianas_yt": 318647.0
+    },
+    {
+      "country": "JP",
+      "n_videos_musica": 25,
+      "engajamento_medio_yt": 3.065,
+      "views_medianas_yt": 1756741.0
+    },
+    {
+      "country": "MX",
+      "n_videos_musica": 28,
+      "engajamento_medio_yt": 1.574,
+      "views_medianas_yt": 688086.0
+    },
+    {
+      "country": "US",
+      "n_videos_musica": 28,
+      "engajamento_medio_yt": 3.098,
+      "views_medianas_yt": 1020662.5
+    }
+  ],
+  "auditoria": [
+    {
+      "etapa": "etl3_correlacao",
+      "inicio": "2026-11-08 23:28:45.345834",
+      "fim": "2026-11-08 23:28:45.345836",
+      "linhas": 30,
+      "status": "parcial",
+      "mensagem": "Spotify parcial; YouTube ausente. Integração técnica, sem validação completa real."
+    },
+    {
+      "etapa": "etl4_regiao",
+      "inicio": "2026-11-08 23:28:45.413865",
+      "fim": "2026-11-08 23:28:45.413867",
+      "linhas": 105,
+      "status": "parcial",
+      "mensagem": "Spotify parcial; YouTube ausente. Integração técnica, sem validação completa real."
+    },
+    {
+      "etapa": "etl1_spotify",
+      "inicio": "2026-11-08 23:28:45.416943",
+      "fim": "2026-11-08 23:28:45.416944",
+      "linhas": 1900,
+      "status": "parcial",
+      "mensagem": "301/400 respostas Spotify; HTTP 429; 1500 posições; 99 faixas com fallback CSV."
+    },
+    {
+      "etapa": "etl2_youtube",
+      "inicio": "2026-11-09 05:13:39.384158",
+      "fim": "2026-11-09 05:13:57.998631",
+      "linhas": 165,
+      "status": "ok",
+      "mensagem": "modo=real"
+    },
+    {
+      "etapa": "etl3_correlacao",
+      "inicio": "2026-11-09 05:13:58.014854",
+      "fim": "2026-11-09 05:14:01.262858",
+      "linhas": 47,
+      "status": "ok",
+      "mensagem": "modo=real"
+    },
+    {
+      "etapa": "etl4_regiao",
+      "inicio": "2026-11-09 05:14:01.273084",
+      "fim": "2026-11-09 05:14:01.756339",
+      "linhas": 105,
+      "status": "ok",
+      "mensagem": "modo=real"
+    }
+  ],
+  "falhas_api": [],
+  "avisos": [
+    "Coleta real 09/11 alinhada aos Charts de 29/10 por país: diferença de 11 dias, acima do limite de 7. Não representa o mesmo período.",
+    "Spotify preservado com 301 de 400 respostas da API; 99 faixas usam nomes dos CSVs, sem estimar metadados.",
+    "Gêneros indisponíveis no banco de origem.",
+    "9 pares classificados automaticamente como match e 8 para revisão; classificação automática não substitui revisão manual.",
+    "Sem amostra suficiente por país/semana para calcular Spearman; valores permanecem nulos."
+  ],
+  "testes_automatizados": {
+    "aprovados": 99,
+    "falhas": 0,
+    "erros": 0
+  },
+  "observacoes_campos_ausentes": [
+    "1 vídeo sem contagem de comentários, preservada como nulo; não foi inventado um zero."
+  ],
+  "dashboard_local": {
+    "abas_sem_excecoes": 5,
+    "videos_distintos": 153,
+    "filtro_brasil_videos": 26,
+    "filtro_vazio_tratado": true,
+    "aviso_desalinhamento_visivel": true
+  }
+}

@@ -18,10 +18,11 @@ import pandas as pd
 from src import db
 from src.config import Config
 from src.extract import youtube as ext
-from src.qualidade import validar
+from src.qualidade import ErroQualidade, validar
 from src.utils import normalizar_titulo_video
 
 log = logging.getLogger("etl2")
+LIMITE_DIAS = 7
 
 
 def duracao_segundos(iso: str | None) -> int | None:
@@ -30,7 +31,7 @@ def duracao_segundos(iso: str | None) -> int | None:
         return None
     try:
         s = int(isodate.parse_duration(iso).total_seconds())
-        return s or None
+        return s if s > 0 else None
     except (isodate.ISO8601Error, ValueError):
         return None
 
@@ -41,6 +42,10 @@ def _int_ou_nulo(valor) -> float:
 
 
 def transformar_videos(raw: pd.DataFrame, categorias: pd.DataFrame) -> pd.DataFrame:
+    if raw.empty:
+        raise ErroQualidade("[youtube_video] coleta vazia; nenhum vídeo para transformar")
+    validar(raw, "raw_youtube_video", chaves=["video_id", "country", "snapshot_date"],
+            obrigatorias=["video_id", "country", "snapshot_date", "payload"])
     nomes_cat = dict(zip(categorias["category_id"], categorias["nome"])) if len(categorias) else {}
     linhas = []
     for _, r in raw.iterrows():
@@ -58,8 +63,9 @@ def transformar_videos(raw: pd.DataFrame, categorias: pd.DataFrame) -> pd.DataFr
             "comentarios": _int_ou_nulo(st.get("commentCount")),
         })
     df = pd.DataFrame(linhas)
+    df["titulo"] = df["titulo"].replace("", pd.NA)
     df["categoria"] = df["category_id"].map(nomes_cat).fillna("Desconhecida")
-    df["titulo_normalizado"] = df["titulo"].map(normalizar_titulo_video)
+    df["titulo_normalizado"] = df["titulo"].fillna("").map(normalizar_titulo_video)
     df["publicado_em"] = pd.to_datetime(df["publicado_em"], errors="coerce", utc=True).dt.tz_localize(None)
 
     views = df["views"].where(df["views"] > 0)
@@ -75,33 +81,74 @@ def transformar_videos(raw: pd.DataFrame, categorias: pd.DataFrame) -> pd.DataFr
     return df
 
 
-def alinhar_semana(videos: pd.DataFrame, datas_chart: list) -> pd.DataFrame:
+def alinhar_semana(videos: pd.DataFrame, datas_chart: list | pd.DataFrame) -> pd.DataFrame:
     """Leva a data da coleta do YouTube para a semana de chart mais próxima.
 
     No modo real o YouTube só mostra o que está em alta HOJE (ex.: 18/10), mas o CSV
     do Spotify Charts é de uma semana fechada (ex.: 16/10). Sem este alinhamento as
     duas fontes nunca se cruzariam. A data original continua na camada RAW.
     """
-    if videos.empty or not datas_chart:
+    if videos.empty or len(datas_chart) == 0:
         return videos
+    if isinstance(datas_chart, pd.DataFrame):
+        partes = []
+        for pais, grupo in videos.groupby("country", sort=False):
+            datas_pais = datas_chart.loc[datas_chart["country"] == pais, "snapshot_date"].tolist()
+            if not datas_pais:
+                raise ErroQualidade(f"[youtube_video] nenhum Spotify Chart disponível para {pais}")
+            partes.append(alinhar_semana(grupo, datas_pais))
+        return pd.concat(partes).sort_index()
     datas = sorted(pd.to_datetime(pd.Series(datas_chart)).dt.date.unique())
+
     def mais_proxima(d):
         return min(datas, key=lambda c: abs((c - d).days))
+
     df = videos.copy()
-    df["snapshot_date"] = pd.to_datetime(df["snapshot_date"]).dt.date.map(mais_proxima)
-    # se duas coletas caírem na mesma semana, fica a mais recente
-    return df.sort_values("publicado_em").drop_duplicates(
-        ["video_id", "country", "snapshot_date"], keep="last")
+    coleta = pd.to_datetime(df["snapshot_date"]).dt.date
+    alinhada = coleta.map(mais_proxima)
+
+    # aviso: coleta muito longe do CSV mais próximo (dados podem estar desalinhados)
+    distancia = pd.Series(
+        [abs((a - c).days) for a, c in zip(alinhada, coleta)], index=df.index
+    )
+    longe = distancia > LIMITE_DIAS
+    if longe.any():
+        log.warning(
+            "%d registros com coleta a mais de %d dias do CSV mais próximo "
+            "(distância máxima: %d dias). Confira se os CSVs da semana estão em data/charts/.",
+            int(longe.sum()), LIMITE_DIAS, int(distancia.max()),
+        )
+
+    df["_coleta"] = coleta
+    df["snapshot_date"] = alinhada
+    # se duas coletas caírem na mesma semana, fica a mais recente (pela data da coleta)
+    df = df.sort_values("_coleta", kind="stable").drop_duplicates(
+        ["video_id", "country", "snapshot_date"], keep="last"
+    )
+    return df.drop(columns="_coleta")
 
 
 def executar(cfg: Config, engine) -> dict:
     raw, cat = ext.extrair(cfg)
     db.upsert(engine, "raw_youtube_categoria", cat)
     db.upsert(engine, "raw_youtube_video", raw)
-    videos = transformar_videos(raw, cat)
     if cfg.modo == "real":
-        datas_chart = db.ler(engine, "SELECT DISTINCT snapshot_date FROM spotify_chart")["snapshot_date"]
-        videos = alinhar_semana(videos, list(datas_chart))
+        coletados = set(raw["country"]) if not raw.empty else set()
+        faltando = set(cfg.paises) - coletados
+        if faltando:
+            raise ErroQualidade("[youtube_video] coleta incompleta nos países: "
+                                + ", ".join(sorted(faltando)) + "; dados recebidos preservados na RAW")
+    videos = transformar_videos(raw, cat)
+    fora_musica = videos["category_id"].astype(str) != "10"
+    if fora_musica.any():
+        log.warning("ETL2: %d vídeos fora da categoria Música preservados somente na RAW",
+                    int(fora_musica.sum()))
+        videos = videos.loc[~fora_musica].copy()
+    if cfg.modo == "real":
+        datas_chart = db.ler(engine, "SELECT DISTINCT country, snapshot_date FROM spotify_chart")
+        if datas_chart.empty:
+            raise ErroQualidade("[youtube_video] carregue os Spotify Charts antes de alinhar a coleta real")
+        videos = alinhar_semana(videos, datas_chart)
     videos = validar(videos, "youtube_video",
                      chaves=["video_id", "country", "snapshot_date"],
                      obrigatorias=["titulo", "views"],

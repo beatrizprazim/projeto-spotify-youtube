@@ -1,0 +1,209 @@
+{
+  "data_utc": "2026-11-09T02:18:00.481637+00:00",
+  "modo": "real",
+  "pausada_por_429": true,
+  "faixas_esperadas": 400,
+  "faixas_recebidas_api": 301,
+  "linhas_chart": 1500,
+  "faixas_sem_resposta": [
+    "61vlMpyFxXmxvahvA7Bi3z",
+    "6272S5nkbOvQDazRYq6muV",
+    "65aH3l8LEmRp3HuH5XpKoH",
+    "6756nr1dYiw5aNLSgIHNOI",
+    "67DgVQlvQ0qilSBN1hdkKN",
+    "68lbSrXDORS51pmyjZv712",
+    "69Jv5kHVN8bskDdOO2xdIW",
+    "6Ab2trdJulkRRhaJ9zVGQa",
+    "6C1RD7YQVvt3YQj0CmuTeu",
+    "6DUdDIRgLqCGq1DwkNWQTN",
+    "6Exec6nPRIwvAEu3N8pVnT",
+    "6IPwKM3fUUzlElbvKw2sKl",
+    "6LD1tYOKReFqZh5ZdCdxIz",
+    "6MNGKzuASaYpdEuyV6ha1V",
+    "6OoYmAP9oZtBiSomWpDTWP",
+    "6PWlmKg86bvzmG7aSNe8Dq",
+    "6Qyc6fS4DsZjB2mRW9DsQs",
+    "6RRnUWV7wemVRFZjPRQo66",
+    "6RWQ0enEtrtUE0zVNdpUcw",
+    "6RcAHyC5sAUIbPTkhOQwd8",
+    "6SuIUd8Wl5tZcyMFAV0EZJ",
+    "6U9VpmP3dEinuezxCJ2Zg9",
+    "6UO9DhCUq4ZbQz7PXwelFV",
+    "6UtWwuheJr5LLDeVypPNx7",
+    "6VDw2mGBIa4csypjOhS6JT",
+    "6W4fSGsqNmyPTYo29rJ50z",
+    "6XXQA6e8qXPJ1sZtRxvbws",
+    "6XbtvPmIpyCbjuT0e8cQtp",
+    "6ad36mVIDEoBOwhnlnjhcl",
+    "6bQsFck5fRznOrCfJMxF1c",
+    "6bpIrlJ06Fb6amL5M9djmi",
+    "6dT5W7zuEcUZHnZuVlSIJ5",
+    "6eLQXa6uk2EW8drsiKbABZ",
+    "6hFzA2zbArwtGpmTQEsxnn",
+    "6hlYmR30RGaHIz4UlVOG2U",
+    "6hnk0Fesq9JOhWpck8HJsj",
+    "6hpuesKPNa3WhV48O7Fa47",
+    "6iWg7wVBXWwQYlVqp4UKPh",
+    "6ifUES3keWjwXgae8pXI3o",
+    "6jdOi5U5LBzQrc4c1VT983",
+    "6jfiwkcwt8iYCdkbLukxeI",
+    "6kUopck7LHVadAjAFcXiTj",
+    "6kaWah1Acn1dtNjAy6sm1p",
+    "6lZjGV5YRf4JP82ylbO0yu",
+    "6mj3eOn5r61kiRRdu4atAO",
+    "6n9JMoXkXu4lDOu1k6MRpy",
+    "6nloIaklTZd2Sbpk4laaeJ",
+    "6p2pU9ifdZDgZGObiVcETS",
+    "6pj8VUJtzZFmGq5FW26kt5",
+    "6pk6E0SZxILzfaAGFngxEs",
+    "6pryujEohwqSNKGTW33SKE",
+    "6qB3lZIfnDC8TE2245NDtO",
+    "6r6IPuFvUX72kQGc9b46rk",
+    "6rWIHEedAYET828v7QY22S",
+    "6sGIMrtIzQjdzNndVxe397",
+    "6uiQ0DqbXTBc8tl0AUKZkR",
+    "6xNVBgIRbb9cHKR1ipzIfm",
+    "6xQwzsTwW0GFeYfADodNsc",
+    "6znjONJrY5EFnn8TsIsPwx",
+    "70A0AekMvr4DdxaKa1tQE0",
+    "70LcF31zb1H0PyJoS1Sx1r",
+    "70cHKK8bHAfJrOGVnfRG9J",
+    "71LFe32b7ne58NiL1jvwmp",
+    "76lukrvGiAM7GBcjE4Gx4h",
+    "77fL8ATR0dpUDLI0XLmDBV",
+    "7ARRCcCMXLzdda2w5jxSY4",
+    "7AZ2LheRr13nDXyVrXKKMQ",
+    "7Aqb1fB7RvYgQMau49kmxh",
+    "7By1xSEpnisnvOK6CvrEk1",
+    "7CmWXD3w1xOO53AAO4LRVQ",
+    "7D3INyQTrKEkKzWJe4Eigr",
+    "7DHAuCYRhuJVJPCwbFJA08",
+    "7FcV9ysZVFnmAOYwipRSGp",
+    "7FluWUa59Z3kXYdbguz8Wr",
+    "7HNGIBi7xkcN1YGyhdjPkA",
+    "7KNY1e9x1MDvpBAmIAN3tz",
+    "7L1UsUbSqowTKwrgT0v8AS",
+    "7MOO89Qv9AV7VZkt5mcqA8",
+    "7az7NyQSqKGs3sXFlTCAr4",
+    "7bxaFZ1O3cHkgLKMsdC3xR",
+    "7bywjHOc0wSjGGbj04XbVi",
+    "7cYwK2NkBOMpKs44d6HroI",
+    "7d6yK8v8J484SWH5prIQiE",
+    "7dLw4FM0rYgwJEzkbwRVr1",
+    "7dNXSf4lS30n1lBfFavQK5",
+    "7dTW21YAJxnAOiUh7Rtu9S",
+    "7f9DsQEsIoeTwKxV6shsom",
+    "7hORRB8tJcRsi9aK0D0LGc",
+    "7ikOwlVju9HYUKthPiNHwr",
+    "7iqKykCsZ1NUBEHDErGT63",
+    "7koAf6aZgjO6TS7bipfPD0",
+    "7qjZnBKE73H4Oxkopwulqe",
+    "7scFxt9VhL4FJwuPSfRlfN",
+    "7ujApz6iFP3PmKIDGcaGbe",
+    "7upAH0ezzsThyvr33YKn4u",
+    "7uxkx8HPBYkJKcimOyggUM",
+    "7wS6EAZast0FJGw79CXGND",
+    "7yNf9YjeO5JXUE3JEBgnYc",
+    "7zoVtzzASRtacCvgQKLFaS"
+  ],
+  "chamadas_logicas": 600,
+  "falhas_apos_retentativas": [
+    {
+      "endpoint": "artist",
+      "id": "2rmkQLzj0k4nZdQehOUByO",
+      "status": "erro",
+      "http_status": 429,
+      "tipo": "SpotifyException"
+    }
+  ],
+  "observacao_retentativas": "Eventos representam chamadas lógicas após retries; não cada tentativa HTTP.",
+  "campos_preenchidos": {
+    "nome": 400,
+    "artista_principal": 400,
+    "artistas": 400,
+    "album": 301,
+    "duracao_ms": 301,
+    "data_lancamento": 301,
+    "generos": 0,
+    "genero_principal": 0
+  },
+  "duracao_min_minima": 1.85,
+  "duracao_min_maxima": 10.4,
+  "duracoes_fora_05_a_15_min": 0,
+  "divergencias_nome_ou_id": [
+    {
+      "track_id": "0sZJ7goWjAmHxNcoV3oRay",
+      "id_retornado": "0sZJ7goWjAmHxNcoV3oRay",
+      "nomes_csv": [
+        "Toki Koete Universe"
+      ],
+      "nome_api": "時空超えてユニバース"
+    },
+    {
+      "track_id": "0vDqNzQqEhl7boeRS3Joli",
+      "id_retornado": "0vDqNzQqEhl7boeRS3Joli",
+      "nomes_csv": [
+        "Sukisugite METSU!"
+      ],
+      "nome_api": "好きすぎて滅！"
+    },
+    {
+      "track_id": "1F1hibBCtNeObRMmEMLHNh",
+      "id_retornado": "1F1hibBCtNeObRMmEMLHNh",
+      "nomes_csv": [
+        "Bakuretsu Aishiteru"
+      ],
+      "nome_api": "爆裂愛してる"
+    },
+    {
+      "track_id": "2cKiHG16JBiqHdi7Llq0r7",
+      "id_retornado": "2cKiHG16JBiqHdi7Llq0r7",
+      "nomes_csv": [
+        "Marigold"
+      ],
+      "nome_api": "マリーゴールド"
+    },
+    {
+      "track_id": "4Jv7U0JJpbQnOrjtDwDZTZ",
+      "id_retornado": "4Jv7U0JJpbQnOrjtDwDZTZ",
+      "nomes_csv": [
+        "Naked Heart"
+      ],
+      "nome_api": "裸の心"
+    },
+    {
+      "track_id": "4zFFLQwm2zzQg8bcg9dald",
+      "id_retornado": "4zFFLQwm2zzQg8bcg9dald",
+      "nomes_csv": [
+        "Yuzutsu"
+      ],
+      "nome_api": "夕星-ゆうづつ-"
+    },
+    {
+      "track_id": "53qkszfgztIvkFyF31GfdQ",
+      "id_retornado": "53qkszfgztIvkFyF31GfdQ",
+      "nomes_csv": [
+        "Dreams - 2004 Remaster"
+      ],
+      "nome_api": "Dreams - 2001 Remaster"
+    },
+    {
+      "track_id": "5u9rjyUgfIJXRk0RHKQ2GK",
+      "id_retornado": "5u9rjyUgfIJXRk0RHKQ2GK",
+      "nomes_csv": [
+        "That's!Chojo"
+      ],
+      "nome_api": "ザッツ！超常"
+    },
+    {
+      "track_id": "5zVK7UN0rW7aMCSqX3vYXy",
+      "id_retornado": "5zVK7UN0rW7aMCSqX3vYXy",
+      "nomes_csv": [
+        "IDOLPOWER"
+      ],
+      "nome_api": "アイドルパワー"
+    }
+  ],
+  "duplicados_chart": 0,
+  "duplicados_faixa": 0
+}
