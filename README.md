@@ -64,11 +64,14 @@ pytest           # transformações, extração, qualidade, pipeline e precisão
 
 ### Apresentar com dados reais em outro computador
 
-O dashboard só lê o banco, que no modo local é um único arquivo: `data/tendencias.db`.
+O dashboard lê o banco configurado em `DATABASE_URL`. Sem essa variável, usa
+`deploy/tendencias.db` quando disponível; caso contrário, usa `data/tendencias.db`.
 
 1. No PC com as chaves, rode `python -m src.pipeline` com `MODO=real`.
-2. Copie `data/tendencias.db` para a pasta `data/` do projeto no outro PC (pen drive, Drive ou WhatsApp).
-3. No outro PC, rode **só** `streamlit run dashboard/app.py`. **Não rode o pipeline lá**, senão ele mistura dados simulados no banco real.
+2. Copie o banco gerado para o outro PC e configure `DATABASE_URL` para o caminho dele.
+   Por exemplo, no PowerShell: `$env:DATABASE_URL = "sqlite:///data/tendencias.db"`.
+3. Rode **só** `streamlit run dashboard/app.py`. **Não rode o pipeline lá**, pois isso
+   pode misturar cargas no banco apresentado.
 
 As chaves nunca saem do primeiro PC. O dashboard descobre pelo próprio banco que os dados são reais e tira o aviso de "dados simulados".
 
@@ -110,11 +113,24 @@ A API do YouTube só devolve o que está em alta **agora**. Para ter série hist
 
 ## Resultados com dados reais
 
-Os resultados devem ser registrados após conectar o banco produzido pelo pipeline real.
-Não há banco real incluído nesta cópia. Os CSVs do Spotify, isoladamente, não comprovam
-as métricas de YouTube, matching ou correlação. Consulte as cinco abas e registre o
-período, os países e filtros junto com os resultados. Não use os números de testes
-simulados como conclusões sobre o mercado.
+O banco real disponível em `deploy/tendencias.db` foi validado em 09/11/2026. A carga é
+parcial e deve ser interpretada com estas limitações:
+
+- **Spotify:** 1.500 posições em seis países (AR, BR, ES, JP, MX e US), de 01 a
+  29/10/2026; 301 de 400 faixas receberam metadados da API. As outras 99 mantêm os
+  nomes dos Charts, sem metadados estimados. Gêneros não estão disponíveis.
+- **YouTube:** 165 vídeos de música tratados (153 IDs distintos) em seis países.
+  A coleta real ocorreu em 09/11 e foi alinhada ao Chart de 29/10, uma diferença de
+  11 dias; não é uma comparação do mesmo período nem uma série histórica semanal.
+  A mediana do engajamento nas observações tratadas é 1,90%.
+- **Cruzamento:** 9 vínculos automáticos confirmados e 8 aguardando revisão. Não houve
+  amostra suficiente para calcular Spearman; a correlação permanece indisponível.
+- **Regiões:** dados reais de vídeos e engajamento estão disponíveis para os seis
+  países, mas os indicadores de gênero ficam vazios por falta de metadados.
+
+O dashboard abre esse banco por padrão, exibe avisos de cobertura e desalinhamento e
+permite conferir as cinco abas. Seus gráficos e métricas refletem os filtros atuais;
+não use saídas de testes simulados como conclusões sobre o mercado.
 
 ## Limitações e melhorias futuras
 
@@ -123,10 +139,10 @@ Ver [`docs/decisoes_tecnicas.md`](docs/decisoes_tecnicas.md#melhorias-futuras).
 ## Deploy online (Streamlit Community Cloud)
 
 1. Execute o pipeline real em ambiente com as credenciais e valide o banco gerado.
-2. Configure um banco PostgreSQL persistente acessível pelo servidor; informe sua
-   `DATABASE_URL` em Secrets. Alternativamente, disponibilize `data/tendencias.db`
-   no ambiente do app por um processo de entrega controlado. O banco local é temporário
-   na hospedagem; ele não será reconstruído pelo dashboard.
+2. O repositório inclui `deploy/tendencias.db`, selecionado automaticamente quando
+   `DATABASE_URL` não estiver configurada. Para dados atualizados, configure um banco
+   PostgreSQL persistente em Secrets ou disponibilize um SQLite por um processo de
+   entrega controlado; o dashboard não reconstrói nem atualiza o banco.
 3. No Streamlit Community Cloud, selecione o repositório, a branch que contém estas
    alterações e o arquivo `dashboard/app.py`. Use Python 3.12 e `requirements.txt`.
 4. Abra o app e confira Spotify, YouTube, Música × Vídeo, Regiões e Pipeline.

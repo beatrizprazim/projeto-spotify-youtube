@@ -14,6 +14,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.engine import URL
+from streamlit.errors import StreamlitSecretNotFoundError
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -25,7 +28,7 @@ try:
     for _k, _v in st.secrets.items():
         if isinstance(_v, (str, int, float)):
             os.environ.setdefault(_k, str(_v))
-except Exception:  # rodando local, sem secrets.toml: usa o .env
+except StreamlitSecretNotFoundError:  # secrets.toml é opcional para acesso local ao banco
     pass
 
 from src.config import Config  # noqa: E402
@@ -43,7 +46,7 @@ AZUL, LARANJA = "#1F6FA8", "#E07B24"
 
 
 @st.cache_data(ttl=600)
-def carregar(database_url: str) -> dict[str, pd.DataFrame]:
+def carregar(database_url: str | URL) -> dict[str, pd.DataFrame]:
     engine = create_engine(database_url)
     consultas = {
         "chart": """SELECT c.*, f.nome, f.artista_principal, f.artistas, f.genero_principal,
@@ -60,6 +63,7 @@ def carregar(database_url: str) -> dict[str, pd.DataFrame]:
         "overlap": "SELECT * FROM regiao_overlap",
         "execucoes": "SELECT * FROM pipeline_execucao ORDER BY inicio DESC",
         "cobertura_api": "SELECT COUNT(DISTINCT track_id) AS recebidas FROM raw_spotify_track",
+        "contagem_pares": "SELECT status, COUNT(*) AS quantidade FROM musica_video GROUP BY status",
     }
     try:
         with engine.connect() as con:
@@ -74,11 +78,18 @@ def carregar(database_url: str) -> dict[str, pd.DataFrame]:
     return dados
 
 
+config = Config()
+database_url: str | URL = config.database_url
+database_deploy = Path(__file__).resolve().parent.parent / "deploy" / "tendencias.db"
+if "DATABASE_URL" not in os.environ and database_deploy.is_file():
+    database_url = URL.create("sqlite", database=str(database_deploy.resolve()))
+
 try:
-    d = carregar(Config().database_url)
-except Exception:  # não expõe credenciais nem detalhes da conexão
-    st.error("Banco indisponível ou esquema incompleto. Configure DATABASE_URL ou copie "
-             "o banco real para data/tendencias.db. Execute o pipeline real antes de abrir o dashboard.")
+    d = carregar(database_url)
+except (SQLAlchemyError, pd.errors.DatabaseError, ValueError) as exc:
+    # Não expõe URLs do banco, que podem conter credenciais.
+    st.error(f"Falha ao carregar o banco ({type(exc).__name__}). Confira DATABASE_URL "
+             "e se o banco contém o esquema de sql/schema.sql.")
     st.stop()
 
 # ------------------------------------------------------------------ filtros
@@ -167,7 +178,12 @@ ultimas = d["execucoes"]
 modos = set(ultimas.loc[ultimas["status"] == "ok", "mensagem"].dropna())
 modo = "real" if modos == {"modo=real"} else "simulado" if modos == {"modo=simulado"} else "não confirmado ou misto"
 if modo != "real":
-    st.warning(f"Origem do banco: {modo}. Estes dados não comprovam resultados reais.")
+    st.warning(f"Origem do banco não confirmada ou mista: {modo}.")
+else:
+    st.info("Origem: execuções marcadas como reais. A cobertura pode ser parcial; consulte os avisos.")
+contagens_pares = d["contagem_pares"].set_index("status")["quantidade"].to_dict()
+st.caption(f"Vínculos de faixa e vídeo: {contagens_pares.get('match', 0)} confirmados automaticamente; "
+           f"{contagens_pares.get('revisar', 0)} aguardam revisão manual.")
 st.caption(f"Semanas de {ini:%d/%m/%Y} a {fim:%d/%m/%Y} · {len(paises)} países · "
            f"fonte: Spotify Charts + Spotify Web API + YouTube Data API v3"
            + (" · ⚠️ DADOS SIMULADOS" if modo == "simulado" else ""))
